@@ -1,7 +1,8 @@
 import { classGroup, decode } from "./detector.js";
 
 const ORT_BASE = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/";
-const MODEL_URL = "https://huggingface.co/webml/yolov8n/resolve/85bc8d7/onnx/yolov8n.onnx";
+// ONNX export of Ultralytics YOLO11n (same weights as the recorded clip), pinned to a revision.
+const MODEL_URL = "https://huggingface.co/webnn/yolo11n/resolve/9c5acfd/onnx/yolo11n.onnx";
 const INPUT = 640;
 const DECODE_FLOOR = 0.1; // decode generously once; the slider filters without re-running the model
 const FEED_LIMIT = 40;
@@ -82,7 +83,7 @@ async function loadModel() {
   if (session) return session;
   loading ??= (async () => {
     $("loader").hidden = false;
-    status("Loading ONNX Runtime and YOLOv8n weights (~13 MB)…");
+    status("Loading ONNX Runtime and YOLO11n weights (~11 MB)…");
     if (!window.ort) await loadScript(`${ORT_BASE}ort.min.js`);
     ort.env.wasm.wasmPaths = ORT_BASE;
     ort.env.wasm.numThreads = 1;
@@ -146,7 +147,15 @@ function visible() {
 
 function draw(source) {
   if (!source) return;
+  // The webcam is shown mirrored, like a mirror; boxes are flipped to match. Exports stay unmirrored.
+  const mirror = mode === "camera";
+  if (mirror) {
+    ctx.save();
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+  }
   ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+  if (mirror) ctx.restore();
 
   const found = visible();
   const line = Math.max(2, canvas.width / 480);
@@ -157,15 +166,16 @@ function draw(source) {
 
   for (const box of found) {
     const color = COLORS[classGroup(box.classId)];
+    const x = mirror ? canvas.width - box.x - box.w : box.x;
     ctx.fillStyle = `${color}1c`;
-    ctx.fillRect(box.x, box.y, box.w, box.h);
+    ctx.fillRect(x, box.y, box.w, box.h);
     ctx.strokeStyle = color;
-    ctx.strokeRect(box.x, box.y, box.w, box.h);
+    ctx.strokeRect(x, box.y, box.w, box.h);
 
     const text = `${box.label} ${Math.round(box.score * 100)}%`;
     const width = ctx.measureText(text).width + size;
     const height = size + 10;
-    const left = Math.min(box.x - line / 2, canvas.width - width);
+    const left = Math.min(x - line / 2, canvas.width - width);
     const top = box.y >= height ? box.y - height : box.y;
     ctx.fillStyle = color;
     ctx.fillRect(left, top, width, height);
@@ -254,6 +264,7 @@ function setMode(next, sourceId) {
   image = null;
   fps = 0;
   const recorded = next === "recorded";
+  $("stage").classList.toggle("is-camera", next === "camera");
   $("recording").hidden = !recorded;
   canvas.hidden = recorded;
   $("export").disabled = true;
@@ -282,7 +293,7 @@ function setMode(next, sourceId) {
       execution: "Playback",
     });
     feedMessage("Boxes in the recording are baked into the video. Start the webcam or analyze an image to inspect live confidence scores here.");
-    status("Recorded example. Pick a live source to load YOLOv8n (~13 MB).");
+    status("Recorded example. Pick a live source to load YOLO11n (~11 MB).");
   } else {
     $("recording").pause();
     canvas.width = 1280; // resizing also clears the previous frame
@@ -290,7 +301,7 @@ function setMode(next, sourceId) {
     setRec(next === "camera" ? "" : "still", next === "camera" ? "STARTING" : "STILL");
     setText({
       mode: next === "camera" ? "LIVE" : "STILL",
-      "hud-right": "YOLOv8n · WASM",
+      "hud-right": next === "camera" ? "YOLO11n · MIRRORED" : "YOLO11n · WASM",
       "hud-left": "DET 00",
       "count-label": "Visible detections",
       count: "00",
@@ -299,7 +310,7 @@ function setMode(next, sourceId) {
       speed: "--",
       "speed-unit": "ms",
       "speed-note": "Per model call on this device",
-      "model-name": "YOLOv8n",
+      "model-name": "YOLO11n",
       "model-note": "ONNX · 80 COCO classes",
       execution: "CPU · WASM",
     });
@@ -343,6 +354,7 @@ async function startCamera() {
     setRec("live", "LIVE");
     status("Webcam live. Every frame is analyzed on this device.");
     starting = false;
+    $("camera").disabled = false;
     updateToggle();
 
     let last = performance.now();
@@ -473,7 +485,7 @@ document.querySelectorAll(".chip").forEach((chip) => {
 $("export").onclick = () => {
   const round = (value) => Math.round(value * 10) / 10;
   download(JSON.stringify({
-    model: "YOLOv8n",
+    model: "YOLO11n",
     mode,
     width: canvas.width,
     height: canvas.height,

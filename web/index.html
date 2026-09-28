@@ -18,7 +18,7 @@
         <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5" /><circle cx="12" cy="12" r="2.6" /></svg>
         Vision Lab
       </a>
-      <span class="topbar-meta">YOLOv8n · ONNX Runtime Web · WASM</span>
+      <span class="topbar-meta">YOLO11n · ONNX Runtime Web · WASM</span>
       <nav>
         <a href="https://sebastianlau.is-a.dev">Portfolio</a>
         <a href="https://github.com/SebastianLau1/vision-lab" target="_blank" rel="noreferrer">Source ↗</a>
@@ -40,7 +40,7 @@
             <button type="button" class="source" id="example" aria-pressed="false"><span>04</span>Sample image</button>
           </div>
           <input id="upload" type="file" accept="image/*" hidden>
-          <p class="status" id="status" role="status" aria-live="polite">Recorded example. Pick a live source to load YOLOv8n (~13 MB).</p>
+          <p class="status" id="status" role="status" aria-live="polite">Recorded example. Pick a live source to load YOLO11n (~11 MB).</p>
         </div>
 
         <div class="stage" id="stage">
@@ -59,9 +59,9 @@
           </div>
 
           <div class="loader" id="loader" hidden>
-            <b>Loading YOLOv8n</b>
+            <b>Loading YOLO11n</b>
             <span class="loader-bar"><i></i></span>
-            <small>ONNX Runtime + weights · ~13 MB · first run only</small>
+            <small>Weights ~11 MB plus the runtime · first run only</small>
           </div>
           <div class="dropzone" aria-hidden="true"><span>Drop image to run detection</span></div>
         </div>
@@ -128,12 +128,12 @@
         <ol>
           <li><span>01</span><b>Capture</b><p>A webcam frame or your image is drawn to a canvas, capped at 1920 px.</p></li>
           <li><span>02</span><b>Letterbox</b><p>Scaled into a 640 × 640 grey-padded square and packed into an RGB float tensor.</p></li>
-          <li><span>03</span><b>Infer</b><p>YOLOv8n runs through ONNX Runtime Web on WebAssembly, on your CPU.</p></li>
+          <li><span>03</span><b>Infer</b><p>YOLO11n runs through ONNX Runtime Web on WebAssembly, on your CPU.</p></li>
           <li><span>04</span><b>Decode</b><p>Top class per anchor, mapped back to image pixels, then class-aware NMS at IoU 0.45.</p></li>
         </ol>
         <p class="fineprint">
-          The recorded clip is separate, pre-rendered output from a YOLO11n + ByteTrack pipeline. Its 29.97 fps is video playback, not inference speed, and live mode shows detections without persistent track IDs.
-          Weights: <a href="https://huggingface.co/webml/yolov8n" target="_blank" rel="noreferrer">webml/yolov8n</a> (upstream Ultralytics license).
+          The recorded clip is pre-rendered output from the same YOLO11n weights plus ByteTrack. Its 29.97 fps is video playback, not inference speed, and live mode shows detections without persistent track IDs. The webcam view is mirrored so it reads like a mirror; exported coordinates are unmirrored.
+          Weights: <a href="https://huggingface.co/webnn/yolo11n" target="_blank" rel="noreferrer">webnn/yolo11n</a>, an ONNX export of Ultralytics YOLO11n (AGPL-3.0).
           Footage: <a href="https://www.pexels.com/video/traffic-on-highway-in-city-12240861/" target="_blank" rel="noreferrer">João Pavese / Pexels</a>.
         </p>
       </section>
