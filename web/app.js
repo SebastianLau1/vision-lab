@@ -6,7 +6,7 @@ const MODEL_URL = "https://huggingface.co/webnn/yolo11n/resolve/9c5acfd/onnx/yol
 const INPUT = 640;
 const DECODE_FLOOR = 0.1; // decode generously once; the slider filters without re-running the model
 const FEED_LIMIT = 40;
-const RECORDED_FPS = 29.97;
+const RECORDED_FPS = 23.976;
 const COLORS = { person: "#ffd60a", vehicle: "#ff6a3d", animal: "#c38bff", other: "#8cf56b" };
 
 const $ = (id) => document.getElementById(id);
@@ -281,18 +281,18 @@ function setMode(next, sourceId) {
       mode: "RECORDED",
       "hud-res": "1280 × 720",
       "hud-right": "YOLO11n + BYTETRACK",
-      "count-label": "Classes in clip",
-      count: "04",
-      "count-note": "Car · truck · motorcycle · bus",
+      "count-label": "Tracked class",
+      count: "Person",
+      "count-note": "IDs persist across frames",
       "speed-label": "Playback rate",
-      speed: String(RECORDED_FPS),
+      speed: RECORDED_FPS.toFixed(2),
       "speed-unit": "fps",
       "speed-note": "Video frame rate, not inference speed",
       "model-name": "YOLO11n",
       "model-note": "+ ByteTrack, pre-rendered",
       execution: "Playback",
     });
-    feedMessage("Boxes in the recording are baked into the video. Start the webcam or analyze an image to inspect live confidence scores here.");
+    feedMessage("Boxes and IDs in the recording are baked into the video. Start the webcam or analyze an image to inspect live confidence scores here.");
     status("Recorded example. Pick a live source to load YOLO11n (~11 MB).");
   } else {
     $("recording").pause();
@@ -406,9 +406,7 @@ async function analyzeFile(file, sourceId) {
     if (ticket !== version) return;
     await infer(image, ticket);
     if (ticket !== version) return;
-    status(sourceId === "example"
-      ? `Analyzed in ${Math.round(latency)} ms. Thin cyan boxes are baked into this frame; live boxes are in color.`
-      : `Analyzed in ${Math.round(latency)} ms. Drag the confidence slider to explore.`);
+    status(`Analyzed in ${Math.round(latency)} ms. Drag the confidence slider to explore.`);
   } catch (error) {
     if (ticket === version) {
       status(error.message || "Could not read that image.", true);
@@ -431,7 +429,7 @@ $("upload").onchange = (event) => {
 $("example").onclick = async () => {
   $("example").disabled = true;
   try {
-    const response = await fetch("traffic-yolo-poster.jpg");
+    const response = await fetch("crosswalk-sample.jpg"); // clean frame, no baked-in boxes
     if (!response.ok) throw Error("Could not load the sample image.");
     await analyzeFile(await response.blob(), "example");
   } catch (error) {

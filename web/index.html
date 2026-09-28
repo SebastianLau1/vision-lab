@@ -44,7 +44,7 @@
         </div>
 
         <div class="stage" id="stage">
-          <video id="recording" src="traffic-yolo-demo.mp4" poster="traffic-yolo-poster.jpg" autoplay muted loop playsinline aria-label="Traffic footage processed by YOLO11n and ByteTrack, with boxes following cars, trucks, and motorcycles"></video>
+          <video id="recording" src="crosswalk-yolo-demo.mp4" poster="crosswalk-yolo-poster.jpg" autoplay muted loop playsinline aria-label="Pedestrians at Toronto's Yonge–Dundas crossing, tracked by YOLO11n and ByteTrack with a box and ID on each person"></video>
           <video id="webcam" muted playsinline hidden></video>
           <canvas id="display" hidden aria-label="Image with detected objects outlined"></canvas>
 
@@ -90,13 +90,13 @@
       <section class="deck">
         <div class="readouts" aria-label="Readouts">
           <div class="readout">
-            <span id="count-label">Classes in clip</span>
-            <strong id="count">04</strong>
-            <small id="count-note">Car · truck · motorcycle · bus</small>
+            <span id="count-label">Tracked class</span>
+            <strong id="count">Person</strong>
+            <small id="count-note">IDs persist across frames</small>
           </div>
           <div class="readout">
             <span id="speed-label">Playback rate</span>
-            <strong><em id="speed">29.97</em><sub id="speed-unit">fps</sub></strong>
+            <strong><em id="speed">23.98</em><sub id="speed-unit">fps</sub></strong>
             <small id="speed-note">Video frame rate, not inference speed</small>
           </div>
           <div class="readout">
@@ -118,7 +118,7 @@
           </div>
           <div class="feed-summary" id="summary"></div>
           <ol class="feed-list" id="detections">
-            <li class="feed-empty">Boxes in the recording are baked into the video. Start the webcam or analyze an image to inspect live confidence scores here.</li>
+            <li class="feed-empty">Boxes and IDs in the recording are baked into the video. Start the webcam or analyze an image to inspect live confidence scores here.</li>
           </ol>
         </div>
       </section>
@@ -132,9 +132,9 @@
           <li><span>04</span><b>Decode</b><p>Top class per anchor, mapped back to image pixels, then class-aware NMS at IoU 0.45.</p></li>
         </ol>
         <p class="fineprint">
-          The recorded clip is pre-rendered output from the same YOLO11n weights plus ByteTrack. Its 29.97 fps is video playback, not inference speed, and live mode shows detections without persistent track IDs. The webcam view is mirrored so it reads like a mirror; exported coordinates are unmirrored.
+          The recorded clip is pre-rendered output from the same YOLO11n weights plus ByteTrack, tracking people only. Its 23.98 fps is video playback, not inference speed, and live mode shows detections without persistent track IDs. The webcam view is mirrored so it reads like a mirror; exported coordinates are unmirrored.
           Weights: <a href="https://huggingface.co/webnn/yolo11n" target="_blank" rel="noreferrer">webnn/yolo11n</a>, an ONNX export of Ultralytics YOLO11n (AGPL-3.0).
-          Footage: <a href="https://www.pexels.com/video/traffic-on-highway-in-city-12240861/" target="_blank" rel="noreferrer">João Pavese / Pexels</a>.
+          Footage: <a href="https://commons.wikimedia.org/wiki/File:DiagonalCrosswalkYongeDundas.webm" target="_blank" rel="noreferrer">Yonge–Dundas crossing, Toronto, by Raysonho</a> (Wikimedia Commons, CC0).
         </p>
       </section>
     </main>
