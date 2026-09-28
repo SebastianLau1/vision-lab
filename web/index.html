@@ -1,1 +1,149 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Real YOLO inference on your webcam and images. Your frames stay in your browser."><title>Vision Lab · Sebastian Lau</title><link rel="stylesheet" href="styles.css"><style>:root{--accent:#67e8f9;--glow:#67e8f915}.visiongrid{grid-template-columns:minmax(0,1fr) 310px}.stage{position:relative;background:#030608;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}.stage video,.stage canvas{width:100%;height:100%;object-fit:contain;max-height:650px}.stagefoot{padding:15px 20px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:20px}.signal{width:7px;height:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 14px var(--accent)}.corner{position:absolute;width:22px;height:22px;border-color:var(--accent);border-style:solid;pointer-events:none;opacity:.6}.tl{top:14px;left:14px;border-width:2px 0 0 2px}.tr{top:14px;right:14px;border-width:2px 2px 0 0}.bl{bottom:14px;left:14px;border-width:0 0 2px 2px}.br{bottom:14px;right:14px;border-width:0 2px 2px 0}.detection{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:9px 0;font-size:14px}.detection b{color:var(--accent);font-family:'IBM Plex Mono';font-size:12px}@media(max-width:980px){.visiongrid{grid-template-columns:1fr}}</style></head><body><header class="appbar"><a class="brand" href="./"><span class="brandmark">◉</span>Vision Lab</a><nav><a href="https://sebastianlau.is-a.dev">Portfolio</a><a href="https://github.com/SebastianLau1/vision-lab" target="_blank" rel="noreferrer">Source ↗</a></nav></header><main><div class="intro"><div><span class="kicker">02 / BROWSER COMPUTER VISION</span><h1>See what the model sees.</h1><p>Real YOLO inference on your webcam and images. Your frames stay in your browser.</p></div><span class="badge">PERSONAL PROJECT / 2026</span></div><div class="row spread" style="margin-bottom:20px"><div class="tabs" aria-label="Input mode"><button class="active" id="recorded">Recorded demo</button><button id="camera">Start webcam</button><label class="button" for="upload" style="margin:0;cursor:pointer">Upload image ↗</label><input id="upload" type="file" accept="image/*" hidden></div><span class="badge" id="model-badge">YOLO11n + ByteTrack / RECORDED</span></div><div class="grid visiongrid"><section class="stack"><div class="panel stagepanel"><div class="panelhead"><div class="row"><span class="signal"></span><span class="caption" id="stage-label">RECORDED MODEL OUTPUT</span></div><span class="caption" id="resolution">1280 × 720</span></div><div class="stage"><video id="recording" src="traffic-yolo-demo.mp4" poster="traffic-yolo-poster.jpg" controls autoplay muted loop playsinline></video><video id="webcam" muted playsinline hidden></video><canvas id="display" hidden></canvas><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div></div><div class="stagefoot"><span id="stage-note">Actual YOLO11n + ByteTrack output. Boxes are baked into this recording.</span><span class="mono">LOCAL FIRST</span></div></div><div class="stats"><div class="stat"><span id="count-label">Detector classes</span><strong id="count">04</strong><small id="count-note">In recorded pipeline</small></div><div class="stat"><span id="speed-label">Video frame rate</span><strong id="speed">29.97</strong><small id="speed-note">FPS · not inference speed</small></div><div class="stat"><span>Execution</span><strong style="font-size:24px" id="execution">Playback</strong><small>No server upload</small></div></div></section><aside class="stack"><div class="panel pad stack"><div><span class="kicker">Inference controls</span><h2 style="margin-top:10px">Tune your view.</h2></div><div><label for="confidence">Confidence threshold <span id="confidence-value" class="pill">35%</span></label><input id="confidence" type="range" min="10" max="90" value="35"><p class="subtle" style="margin:8px 0 0">Applies to webcam and uploaded images.</p></div><div><label for="class-filter">Class filter</label><select id="class-filter"><option value="all">All 80 COCO classes</option><option value="person">People</option><option value="vehicle">Vehicles</option><option value="animal">Animals</option></select></div><button id="example">Run YOLO on sample image</button><button id="stop" disabled>Stop webcam</button><button id="export" disabled>Export detections JSON ↗</button><div class="status" id="status" role="status" aria-live="polite">Choose webcam or an image to load YOLOv8n (~13 MB).</div></div><div class="panel"><div class="panelhead"><h2>Detections</h2><span class="pill" id="mode">RECORDED</span></div><div class="pad" id="detections"><p class="subtle">Car · truck · motorcycle · bus</p><p class="subtle">Upload an image or start the webcam to inspect live confidence scores.</p></div></div><details class="panel pad"><summary>Model & privacy notes</summary><p>Live inference uses YOLOv8n with ONNX Runtime Web on your CPU. The first run downloads public model weights. Camera access requires permission and HTTPS. Frame rate depends on your device. Recorded footage uses a separate YOLO11n + ByteTrack pipeline; live boxes are detections, not persistent tracks.</p><p><a href="https://www.pexels.com/video/traffic-on-highway-in-city-12240861/" target="_blank" rel="noreferrer">Footage: João Pavese / Pexels ↗</a></p></details></aside></div><footer class="footer"><span>Built by Sebastian Lau · Explore, inspect, experiment.</span><a href="https://github.com/SebastianLau1/vision-lab">Read the architecture ↗</a></footer></main><script type="module" src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Run YOLO object detection on your webcam or any image, entirely in the browser. Frames never leave your device.">
+    <meta name="theme-color" content="#070707">
+    <title>Vision Lab · Sebastian Lau</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070707'/%3E%3Cpath d='M7 12V7h5M20 7h5v5M25 20v5h-5M12 25H7v-5' fill='none' stroke='%23ffd60a' stroke-width='2.4'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ffd60a'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Vision Lab home">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5" /><circle cx="12" cy="12" r="2.6" /></svg>
+        Vision Lab
+      </a>
+      <span class="topbar-meta">YOLOv8n · ONNX Runtime Web · WASM</span>
+      <nav>
+        <a href="https://sebastianlau.is-a.dev">Portfolio</a>
+        <a href="https://github.com/SebastianLau1/vision-lab" target="_blank" rel="noreferrer">Source ↗</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <h1>See what the model sees.</h1>
+        <p>Real-time object detection on your webcam or any image, running entirely in this tab. Nothing is uploaded.</p>
+      </section>
+
+      <section class="viewfinder" aria-label="Detection viewer">
+        <div class="sourcebar">
+          <div class="sources" role="group" aria-label="Input source">
+            <button type="button" class="source is-active" id="recorded" aria-pressed="true"><span>01</span>Recorded demo</button>
+            <button type="button" class="source" id="camera" aria-pressed="false"><span>02</span>Webcam</button>
+            <button type="button" class="source" id="upload-button" aria-pressed="false"><span>03</span>Upload image</button>
+            <button type="button" class="source" id="example" aria-pressed="false"><span>04</span>Sample image</button>
+          </div>
+          <input id="upload" type="file" accept="image/*" hidden>
+          <p class="status" id="status" role="status" aria-live="polite">Recorded example. Pick a live source to load YOLOv8n (~13 MB).</p>
+        </div>
+
+        <div class="stage" id="stage">
+          <video id="recording" src="traffic-yolo-demo.mp4" poster="traffic-yolo-poster.jpg" autoplay muted loop playsinline aria-label="Traffic footage processed by YOLO11n and ByteTrack, with boxes following cars, trucks, and motorcycles"></video>
+          <video id="webcam" muted playsinline hidden></video>
+          <canvas id="display" hidden aria-label="Image with detected objects outlined"></canvas>
+
+          <div class="hud" aria-hidden="true">
+            <span class="bracket tl"></span><span class="bracket tr"></span>
+            <span class="bracket bl"></span><span class="bracket br"></span>
+            <span class="crosshair"></span>
+            <div class="hud-row">
+              <span class="rec" id="rec"><i></i><b id="hud-mode">PLAYBACK</b><em id="hud-left">FRAME 0000</em></span>
+              <span><em id="hud-res">1280 × 720</em><b id="hud-right">YOLO11n + BYTETRACK</b></span>
+            </div>
+          </div>
+
+          <div class="loader" id="loader" hidden>
+            <b>Loading YOLOv8n</b>
+            <span class="loader-bar"><i></i></span>
+            <small>ONNX Runtime + weights · ~13 MB · first run only</small>
+          </div>
+          <div class="dropzone" aria-hidden="true"><span>Drop image to run detection</span></div>
+        </div>
+
+        <div class="controlstrip">
+          <div class="control confidence">
+            <label for="confidence">Confidence <output id="confidence-value" for="confidence">35%</output></label>
+            <input id="confidence" type="range" min="10" max="90" value="35">
+          </div>
+          <div class="control">
+            <span class="control-label" id="filter-label">Classes</span>
+            <div class="chips" role="group" aria-labelledby="filter-label">
+              <button type="button" class="chip is-active" data-filter="all" aria-pressed="true">All 80</button>
+              <button type="button" class="chip" data-filter="person" aria-pressed="false"><i class="swatch person"></i>People</button>
+              <button type="button" class="chip" data-filter="vehicle" aria-pressed="false"><i class="swatch vehicle"></i>Vehicles</button>
+              <button type="button" class="chip" data-filter="animal" aria-pressed="false"><i class="swatch animal"></i>Animals</button>
+            </div>
+          </div>
+          <div class="control actions">
+            <button type="button" class="ghost" id="toggle">Pause clip</button>
+            <button type="button" class="ghost" id="export" disabled>Export JSON ↗</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="deck">
+        <div class="readouts" aria-label="Readouts">
+          <div class="readout">
+            <span id="count-label">Classes in clip</span>
+            <strong id="count">04</strong>
+            <small id="count-note">Car · truck · motorcycle · bus</small>
+          </div>
+          <div class="readout">
+            <span id="speed-label">Playback rate</span>
+            <strong><em id="speed">29.97</em><sub id="speed-unit">fps</sub></strong>
+            <small id="speed-note">Video frame rate, not inference speed</small>
+          </div>
+          <div class="readout">
+            <span>Model</span>
+            <strong class="text" id="model-name">YOLO11n</strong>
+            <small id="model-note">+ ByteTrack, pre-rendered</small>
+          </div>
+          <div class="readout">
+            <span>Execution</span>
+            <strong class="text" id="execution">Playback</strong>
+            <small>No frames leave this device</small>
+          </div>
+        </div>
+
+        <div class="feed">
+          <div class="feed-head">
+            <h2>Detections</h2>
+            <span class="tag" id="mode">RECORDED</span>
+          </div>
+          <div class="feed-summary" id="summary"></div>
+          <ol class="feed-list" id="detections">
+            <li class="feed-empty">Boxes in the recording are baked into the video. Start the webcam or analyze an image to inspect live confidence scores here.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="pipeline" aria-labelledby="pipeline-title">
+        <h2 id="pipeline-title">What happens on each frame</h2>
+        <ol>
+          <li><span>01</span><b>Capture</b><p>A webcam frame or your image is drawn to a canvas, capped at 1920 px.</p></li>
+          <li><span>02</span><b>Letterbox</b><p>Scaled into a 640 × 640 grey-padded square and packed into an RGB float tensor.</p></li>
+          <li><span>03</span><b>Infer</b><p>YOLOv8n runs through ONNX Runtime Web on WebAssembly, on your CPU.</p></li>
+          <li><span>04</span><b>Decode</b><p>Top class per anchor, mapped back to image pixels, then class-aware NMS at IoU 0.45.</p></li>
+        </ol>
+        <p class="fineprint">
+          The recorded clip is separate, pre-rendered output from a YOLO11n + ByteTrack pipeline. Its 29.97 fps is video playback, not inference speed, and live mode shows detections without persistent track IDs.
+          Weights: <a href="https://huggingface.co/webml/yolov8n" target="_blank" rel="noreferrer">webml/yolov8n</a> (upstream Ultralytics license).
+          Footage: <a href="https://www.pexels.com/video/traffic-on-highway-in-city-12240861/" target="_blank" rel="noreferrer">João Pavese / Pexels</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Vision Lab · built by <a href="https://sebastianlau.is-a.dev">Sebastian Lau</a></span>
+      <a href="https://github.com/SebastianLau1/vision-lab" target="_blank" rel="noreferrer">View the code on GitHub ↗</a>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
